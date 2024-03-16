@@ -1,6 +1,8 @@
 package trial.task.delivery_fee_calculator.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import trial.task.delivery_fee_calculator.entity.Weather;
@@ -21,17 +23,34 @@ import java.util.List;
 
 @Service
 public class WeatherService {
-    ArrayList<String> STATIONS = new ArrayList<>(List.of(new String[]{"Tallinn-Harku", "Tartu-Tõravere", "Pärnu"}));
     @Autowired
     private WeatherRepository weatherRepository;
 
+    /**
+     * Request the most resent weather information in the given city.
+     * @param name name of the city
+     * @return Weather entity
+     */
     public Weather getLatestWeatherByName(String name){
-        return weatherRepository.findByNameEndingWithOrderByTimestampDesc(name).get(0);
+        return weatherRepository.findByNameStartingWithOrderByTimestampDesc(name).get(0);
+    }
+
+    /**
+     * Save weather information.
+     */
+    public Weather saveWeather(Weather weather) {
+        return weatherRepository.save(weather);
     }
 
 
+    ArrayList<String> STATIONS = new ArrayList<>(List.of(new String[]{"Tallinn-Harku", "Tartu-Tõravere", "Pärnu"}));
+
+    /**
+     * Request and store weather data from the weather portal of the Estonian Environment Agency
+     */
+    //@EventListener(ApplicationReadyEvent.class)
     @Scheduled(cron = "${weather.request.frequency}")
-    private void scheduledWeatherRequest() throws XMLStreamException, IOException {
+    public void weatherRequest() throws XMLStreamException, IOException {
         URL url = new URL("https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php");
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         XMLEventReader reader = xmlInputFactory.createXMLEventReader(url.openStream());
@@ -54,7 +73,7 @@ public class WeatherService {
                     String name = nextEvent.asCharacters().getData();
                     if (STATIONS.contains(name)) {
                         weather = new Weather(timestamp);
-                        weather.setName(name);
+                        weather.setName(name.toLowerCase());
                     }
                 }
                 if (weather != null) {
@@ -83,12 +102,11 @@ public class WeatherService {
             else if (nextEvent.isEndElement()) {
                 EndElement endElement = nextEvent.asEndElement();
                 if (endElement.getName().getLocalPart().equals("station") && weather != null) {
-                    weatherRepository.save(weather);
+                    saveWeather(weather);
                     weather = null;
                 }
             }
         }
-        System.out.println("weather data saved at " + java.time.LocalTime.now());
-        System.out.println(getLatestWeatherByName("Pärnu").toString());
     }
+
 }

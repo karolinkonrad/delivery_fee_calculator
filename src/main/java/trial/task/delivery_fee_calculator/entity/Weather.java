@@ -2,6 +2,7 @@ package trial.task.delivery_fee_calculator.entity;
 
 import jakarta.persistence.*;
 
+
 @Entity
 @Table
 
@@ -29,6 +30,14 @@ public class Weather {
 
     public Weather() {
 
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getName() {
@@ -69,18 +78,5 @@ public class Weather {
 
     public void setPhenomenon(String phenomenon) {
         this.phenomenon = phenomenon;
-    }
-
-    @Override
-    public String toString() {
-        return "Weather{" +
-                "id=" + id +
-                ", timestamp=" + timestamp +
-                ", name='" + name + '\'' +
-                ", wmocode=" + wmocode +
-                ", airtemperature=" + airtemperature +
-                ", windspeed=" + windspeed +
-                ", phenomenon='" + phenomenon + '\'' +
-                '}';
     }
 }

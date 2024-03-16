@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface WeatherRepository extends CrudRepository<Weather, Long> {
-    List<Weather> findByNameEndingWithOrderByTimestampDesc(String name);
+    List<Weather> findByNameStartingWithOrderByTimestampDesc(String name);
 
 }
