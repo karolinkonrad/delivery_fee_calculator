@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 public class Weather {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column
     private long id;
     @Column
     private long timestamp;
